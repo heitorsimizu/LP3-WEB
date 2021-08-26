@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+    <title>EC - LP3</title>
+    <style>
+        body {
+            font-family: Verdana, sans-serif;
+        }
+
+        td {
+            width: 500px;
+        }
+
+        tr:nth-child(n+1) {
+            background: #5555;
+        }
+        /* #myChart{
+            width: 500px!important;
+            height: 500px!important;
+        } */
+    </style>
+</head>
+
+<body>
+    <h1>Filmes Studio Ghibli:</h1>
+    <p><button onclick="callApi();">Call API</button></p>
+    <p>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Data de Lançamento</th>
+            </tr>
+        </thead>
+        <tbody id="tableData">
+        </tbody>
+    </table>
+    </p>
+    <br>
+
+    <canvas id="myChart" width="600px" height="600px"></canvas>
+</body>
+
+</html>
+
+<script>
+    var dataLancamento;
+
+    function callApi() {
+        let URL = "https://ghibliapi.herokuapp.com/films";
+
+        fetch(URL)
+            .then(req => req.json())
+            .then(show => { console.log(show); fillTable(show); })
+
+    }
+
+    function fillTable(tableData) {
+        dataLancamento = [];
+        const tbodyTag = document.getElementById("tableData");
+        tbodyTag.innerHTML = "";
+        for (var item in tableData) {
+
+            let trTag = document.createElement("tr");
+            let tdTagTitle = document.createElement("td");
+            let tdTagDescription = document.createElement("td");
+            let tdTagRelease = document.createElement("td");
+
+            tdTagTitle.innerHTML = tableData[item].title;
+            trTag.appendChild(tdTagTitle);
+
+            tdTagDescription.innerHTML = tableData[item].description;
+            trTag.appendChild(tdTagDescription);
+
+            tdTagRelease.innerHTML = tableData[item].release_date;
+            trTag.appendChild(tdTagRelease);
+
+            tbodyTag.appendChild(trTag);
+
+            dataLancamento.push(tableData[item].release_date);
+        }
+
+        graficoPizza(dataLancamento);
+    }
+    var myChart;
+
+    function graficoPizza(listaDatas) {
+        var resultado = [0, 0, 0, 0];
+        for (var ano in listaDatas) {
+
+            if (listaDatas[ano] >= 1980 && listaDatas[ano] < 1990)
+                resultado[0]++;
+
+            if (listaDatas[ano] >= 1990 && listaDatas[ano] < 2000)
+                resultado[1]++;
+
+            if (listaDatas[ano] >= 2000 && listaDatas[ano] < 2010)
+                resultado[2]++;
+
+            if (listaDatas[ano] >= 2010 && listaDatas[ano] < 2020)
+                resultado[3]++;
+
+        }
+
+
+        var xValues = ["Anos 80", "Anos 90", "Anos 2000", "2010 em diante"];
+        var barColors = [
+            "#b91d47",
+            "#00aba9",
+            "#2b5797",
+            "#e8c3b9"
+        ];
+        var ctx = document.getElementById('myChart').getContext('2d');
+
+        if (myChart)
+            myChart.destroy();
+
+        myChart = new Chart(ctx, {
+            type: "pie",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    backgroundColor: barColors,
+                    data: resultado
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "World Wide Wine Production"
+                }
+            }
+        });
+    }
+
+</script>
